@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import com.google.firebase.firestore.ktx.firestore
 
 data class AuthState(
     val isLoading: Boolean = false,
@@ -23,6 +24,7 @@ data class AuthState(
 
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
     private val auth: FirebaseAuth = Firebase.auth
+    private val db = Firebase.firestore
     private val dataStore = UserDataStore(application)
 
     // --- State for Auth Flow ---
@@ -32,11 +34,16 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     private val _currentUser = MutableStateFlow(auth.currentUser)
     val currentUser: StateFlow<com.google.firebase.auth.FirebaseUser?> = _currentUser.asStateFlow()
 
+    val currentUserId: String?
+        get() = auth.currentUser?.uid
+
     val savedEmail = dataStore.getEmail
 
     // --- State for Multi-Step Sign Up Form ---
     private val _signUpState = MutableStateFlow(UserSignUpState())
     val signUpState: StateFlow<UserSignUpState> = _signUpState.asStateFlow()
+
+
 
     init {
         auth.addAuthStateListener {
@@ -91,14 +98,35 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     // This function now uses the data from the signUpState
     fun signUpWithDetails(password: String) {
+        val state = _signUpState.value
+        if (state.name.isBlank() || state.email.isBlank() || password.isBlank() || state.profilePicUri == null) {
+            _authState.value = AuthState(error = "Please fill in all required fields, including profile picture.")
+            return
+        }
+
         viewModelScope.launch {
             _authState.value = AuthState(isLoading = true)
             try {
-                // 1. Create the user in Firebase Auth
-                auth.createUserWithEmailAndPassword(_signUpState.value.email, password).await()
+                val result = auth.createUserWithEmailAndPassword(state.email, password).await()
+                val user = result.user
 
-                // 2. TODO: Save the extra user details from _signUpState to Firestore/Realtime Database
-                // For now, we just log them in.
+                if (user != null) {
+                    val userProfile = hashMapOf(
+                        "uid" to user.uid,
+                        "name" to state.name,
+                        "email" to state.email,
+                        "phone" to state.phone,
+                        "city" to state.city,
+                        "pincode" to state.pincode,
+                        "dob" to state.dob,
+                        "availability" to state.availability.toList(),
+                        "skills" to state.skills.toList(),
+                        "joinDate" to System.currentTimeMillis()
+                        // TODO: Upload profilePicUri to Firebase Storage and save the URL
+                    )
+
+                    db.collection("users").document(user.uid).set(userProfile).await()
+                }
 
                 _authState.value = AuthState(isLoading = false, success = true)
             } catch (e: Exception) {

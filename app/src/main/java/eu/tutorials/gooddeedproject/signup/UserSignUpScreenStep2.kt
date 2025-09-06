@@ -24,12 +24,13 @@ import eu.tutorials.gooddeedproject.ui.theme.*
 @Composable
 fun UserSignUpScreenStep2(
     authViewModel: AuthViewModel,
-    onSignUpClick: () -> Unit,
-    onSignInClick: () -> Unit
+    onSignInClick: () -> Unit,
+    onSignUpClick: () -> Unit
 ) {
     val signUpState by authViewModel.signUpState.collectAsState()
-    val password by remember { mutableStateOf("") } // We need a password field here as well for final submission
-    val authState by authViewModel.authState.collectAsState()
+    var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+    var selectedInterest by remember { mutableStateOf("Interests") }
 
     Surface(
         color = MaterialTheme.colorScheme.background,
@@ -60,6 +61,12 @@ fun UserSignUpScreenStep2(
             Text("Step 2 of 2", color = MaterialTheme.colorScheme.onBackground)
             Spacer(modifier = Modifier.height(24.dp))
 
+            InterestsDropdown(
+                selectedInterest = selectedInterest,
+                onInterestSelected = { selectedInterest = it }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
             AuthTextField(
                 value = signUpState.phone,
                 onValueChange = { authViewModel.onSignUpInfoChanged(phone = it) },
@@ -86,17 +93,25 @@ fun UserSignUpScreenStep2(
                 selectedOptions = signUpState.skills,
                 onSelectionChanged = { authViewModel.onSignUpInfoChanged(skills = it) }
             )
-
-            // You'd typically use a Date Picker dialog for this, but a text field is simpler for now
             Spacer(modifier = Modifier.height(16.dp))
             AuthTextField(
                 value = signUpState.dob,
                 onValueChange = { authViewModel.onSignUpInfoChanged(dob = it) },
                 label = "Date of Birth (DD/MM/YYYY)"
             )
+            Spacer(modifier = Modifier.height(16.dp))
+            AuthTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = "Confirm Password",
+                keyboardType = KeyboardType.Password,
+                isPassword = true,
+                passwordVisible = passwordVisible,
+                onPasswordVisibilityChange = { passwordVisible = !passwordVisible }
+            )
             Spacer(modifier = Modifier.height(32.dp))
             Button(
-                onClick = { authViewModel.signUpWithDetails(password) }, // Use the new function
+                onClick = { authViewModel.signUpWithDetails(password) },
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = BlueButtonColor),
                 modifier = Modifier
@@ -107,6 +122,60 @@ fun UserSignUpScreenStep2(
             }
             Spacer(modifier = Modifier.height(24.dp))
             SignInPrompt(onSignInClick = onSignInClick, linkColor = PrimaryBlueText)
+            Spacer(modifier = Modifier.height(40.dp))
+        }
+    }
+}
+
+// THIS IS THE CORRECTED DROPDOWN COMPOSABLE
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun InterestsDropdown(
+    selectedInterest: String,
+    onInterestSelected: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val interests = listOf(
+        "Environmental Protection",
+        "Animal Welfare",
+        "Community Health",
+        "Education for Children",
+        "Disaster Relief"
+    )
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        OutlinedTextField(
+            value = selectedInterest,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Interests") },
+            modifier = Modifier.menuAnchor().fillMaxWidth(),
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = PrimaryBlueText,
+                unfocusedBorderColor = Color.Gray,
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface
+            ),
+            shape = RoundedCornerShape(12.dp)
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            interests.forEach { interest ->
+                DropdownMenuItem(
+                    text = { Text(interest) },
+                    onClick = {
+                        onInterestSelected(interest)
+                        expanded = false
+                    }
+                )
+            }
         }
     }
 }

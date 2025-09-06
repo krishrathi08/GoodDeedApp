@@ -47,7 +47,7 @@ fun SocialLoginButtons(
             modifier = Modifier.size(60.dp),
             contentPadding = PaddingValues(0.dp)
         ) {
-            Icon(painterResource(id = R.drawable.ic_google), contentDescription = "Google Sign In", modifier = Modifier.size(30.dp), tint = Color.Unspecified)
+            Icon(painterResource(id = R.drawable.ic_google), contentDescription = "Google Sign In", modifier = Modifier.size(30.dp), tint = Color.Black)
         }
         OutlinedButton(
             onClick = onAppleClick,
@@ -55,7 +55,7 @@ fun SocialLoginButtons(
             modifier = Modifier.size(60.dp),
             contentPadding = PaddingValues(0.dp)
         ) {
-            Icon(painterResource(id = R.drawable.ic_apple), contentDescription = "Apple Sign In", modifier = Modifier.size(30.dp), tint = Color.White)
+            Icon(painterResource(id = R.drawable.ic_apple), contentDescription = "Apple Sign In", modifier = Modifier.size(30.dp), tint = Color.Black)
         }
         OutlinedButton(
             onClick = onGitHubClick,
@@ -63,7 +63,7 @@ fun SocialLoginButtons(
             modifier = Modifier.size(60.dp),
             contentPadding = PaddingValues(0.dp)
         ) {
-            Icon(painterResource(id = R.drawable.ic_github), contentDescription = "GitHub Sign In", modifier = Modifier.size(30.dp), tint = Color.White)
+            Icon(painterResource(id = R.drawable.ic_github), contentDescription = "GitHub Sign In", modifier = Modifier.size(30.dp), tint = Color.Black)
         }
     }
 }

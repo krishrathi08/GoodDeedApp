@@ -1,99 +1,131 @@
-package com.yourpackage.home
+package eu.tutorials.gooddeedproject.home
 
+import android.app.Application
 import android.net.Uri
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import eu.tutorials.gooddeedproject.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-// --- Sample Data ---
-// This sample data is used to populate the feed initially.
-// In a real app, you would fetch this data from a backend server.
+val CURRENT_USER = Story(userId = "user_krish", userName = "Krish Rathi", profilePicRes = R.drawable.profile_krish)
+
+
 val sampleStories = listOf(
-    Story("Your Story", R.drawable.profile_krish),
-    Story("Akshat", R.drawable.profile_akshat),
-    Story("Prakhar", R.drawable.profile_prakhar),
-    Story("Kartik", R.drawable.profile_kartik),
-    Story("Vansh", R.drawable.profile_vansh),
-    Story("Project Clean Beach", R.drawable.beach_cleanup)
+    // We will programmatically add the current user's story first.
+    Story("user_akshat", "Akshat", R.drawable.profile_akshat),
+    Story("user_prakhar", "Prakhar", R.drawable.profile_prakhar),
+    Story("user_kartik", "Kartik", R.drawable.profile_kartik),
+    Story("user_vansh", "Vansh", R.drawable.profile_vansh),
+    Story("ngo_clean_beach", "Project Clean Beach", R.drawable.beach_cleanup_post)
 )
 
 val samplePosts = listOf(
     Post(
         id = 2,
-        user = sampleStories[5],
+        user = sampleStories[4],
         postedFrom = "",
         caption = "Waves of change start with a single action! A massive thank you to every volunteer who joined us today. Together, we removed hundreds of kilos of trash from Dumas Beach, leaving nothing but our footprints. Our coast is breathing a little easier because of you!",
         initialLikes = 25,
-        commentCount = 3,
         type = PostType.NGO,
-        postImageRes = R.drawable.beach_cleanup_post
+        postImageRes = R.drawable.beach_cleanup_post,
+        comments = listOf(
+            Comment(sampleStories[3], "Amazing work by the team!"),
+            Comment(sampleStories[2], "So inspiring to see this.")
+        )
     ),
     Post(
         id = 3,
-        user = sampleStories[4],
+        user = sampleStories[3],
         postedFrom = "Community Kitchen Help",
         caption = "Making a difference, one plate at a time! Had a truly rewarding day at the community kitchen, connecting with people and ensuring warm meals reach those who need them most. The smiles make all the effort worthwhile.",
         initialLikes = 34,
-        commentCount = 4,
         type = PostType.USER,
-        postImageRes = R.drawable.community_kitchen_post
+        postImageRes = R.drawable.community_kitchen_post,
+        comments = listOf(
+            Comment(sampleStories[1], "Great initiative, Vansh!")
+        )
     ),
     Post(
         id = 1,
-        user = sampleStories[1],
+        user = sampleStories[0],
         postedFrom = "Animal Rescue",
         postImageRes = R.drawable.post_image_dog_rescue,
-        caption = "Every rescue is a journey of trust. Today, we helped a scared little dog find its way for safety. It's moments like these that fuel my passion for animal welfare. So grateful to be part of its second chance.",
+        caption = "Every rescue is a journey of trust. Today, we helped a scared little dog find its way to safety. It's moments like these that fuel my passion for animal welfare. So grateful to be part of its second chance.",
         initialLikes = 48,
-        commentCount = 9,
-        type = PostType.USER
+        type = PostType.USER,
+        comments = listOf(
+            Comment(sampleStories[0], "So heartwarming!"),
+            Comment(sampleStories[4], "You're a hero, Akshat!")
+        )
     )
 )
 
 
-class CommunityViewModel : ViewModel() {
+class CommunityViewModel(application: Application) : AndroidViewModel(application) {
 
-    // This private state holds the list of posts.
     private val _posts = MutableStateFlow(samplePosts)
-    // This is the public, read-only version that the UI observes for changes.
     val posts: StateFlow<List<Post>> = _posts.asStateFlow()
 
-    fun onLikeClicked(post: Post) {
+    private val _stories = MutableStateFlow(listOf(CURRENT_USER.copy(userName = "Your Story")) + sampleStories)
+    val stories: StateFlow<List<Story>> = _stories.asStateFlow()
+
+    fun deletePost(postId: Int) {
         _posts.update { currentPosts ->
-            currentPosts.map {
-                if (it.id == post.id) {
-                    it.copy(
-                        isLiked = !it.isLiked,
-                        likes = if (it.isLiked) it.likes - 1 else it.likes + 1
+            currentPosts.filterNot { it.id == postId }
+        }
+    }
+
+    fun onLikeClicked(postToUpdate: Post) {
+        _posts.update { currentPosts ->
+            currentPosts.map { post ->
+                if (post.id == postToUpdate.id) {
+                    post.copy(
+                        isLiked = !post.isLiked,
+                        likes = if (post.isLiked) post.likes - 1 else post.likes + 1
                     )
                 } else {
-                    it
+                    post
                 }
             }
         }
     }
 
     fun addPost(caption: String, imageUri: Uri?) {
-        // A new post must have an image.
         if (imageUri == null) return
-
         val newPost = Post(
-            id = (_posts.value.maxOfOrNull { it.id } ?: 0) + 1, // Create a new unique ID
-            user = sampleStories[0], // Assumes the current user is "Your Story"
+            id = (_posts.value.maxOfOrNull { it.id } ?: 0) + 1,
+            user = CURRENT_USER,
             postedFrom = "New Post",
-            postImageUri = imageUri, // Use the selected image URI
+            postImageUri = imageUri,
             caption = caption,
             initialLikes = 0,
-            commentCount = 0,
-            type = PostType.USER // New posts are always from the USER
+            comments = emptyList(),
+            type = PostType.USER
+        )
+        _posts.update { currentPosts -> listOf(newPost) + currentPosts }
+    }
+
+    // ADD THIS NEW FUNCTION
+    fun addComment(postId: Int, commentText: String) {
+        if (commentText.isBlank()) return
+
+        val newComment = Comment(
+            user = CURRENT_USER, // New comments are always from the current user
+            text = commentText
         )
 
-        // Add the new post to the top of the list
         _posts.update { currentPosts ->
-            listOf(newPost) + currentPosts
+            currentPosts.map { post ->
+                if (post.id == postId) {
+                    // Adds the new comment to the beginning of the list
+                    post.copy(comments = listOf(newComment) + post.comments)
+                } else {
+                    post
+                }
+            }
         }
     }
 }

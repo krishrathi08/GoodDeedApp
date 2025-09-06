@@ -1,26 +1,32 @@
-package com.yourpackage.home
+package eu.tutorials.gooddeedproject.home
 
 import android.net.Uri
 import androidx.annotation.DrawableRes
 
-// Add this enum to define the types of posts
 enum class PostType {
     USER, NGO
 }
 
 data class Story(
+    val userId: String, // ADD THIS UNIQUE ID
     val userName: String,
     @DrawableRes val profilePicRes: Int
 )
 
+// ADD THIS NEW DATA CLASS
+data class Comment(
+    val user: Story,
+    val text: String
+)
+
 data class Post(
     val id: Int,
-    val user: Story, // For NGOs, this will hold the NGO's name and logo
+    val user: Story,
     val postedFrom: String,
     val caption: String,
     val initialLikes: Int,
-    val commentCount: Int,
-    val type: PostType, // Add this type field
+    val type: PostType,
+    val comments: List<Comment>, // CHANGED from commentCount to a List
     @DrawableRes val postImageRes: Int? = null,
     val postImageUri: Uri? = null,
     val isLiked: Boolean = false,

@@ -1,12 +1,19 @@
 package eu.tutorials.gooddeedproject.home
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.remember
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -17,54 +24,53 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import eu.tutorials.gooddeedproject.R
-import eu.tutorials.gooddeedproject.ui.theme.BlueButtonColor
-import eu.tutorials.gooddeedproject.ui.theme.GoodDeedProjectTheme
-import eu.tutorials.gooddeedproject.ui.theme.PrimaryBlueText
+import eu.tutorials.gooddeedproject.ui.theme.*
+import androidx.lifecycle.viewmodel.compose.viewModel
 
-// --- Sample Data ---
+
+// Sample Data with IDs
 val sampleUpcomingEvents = listOf(
-    UpcomingEvent("Beach Cleanup Day", "Juhu Beach", "07/09/25, 9:00 AM", R.drawable.beach_cleanup),
-    UpcomingEvent("Emergency Relief", "Juhu Beach", "07/09/25, 9:00 AM", R.drawable.emergency_relief)
+    UpcomingEvent(1, "Beach Cleanup Day", "Juhu Beach", "07/09/25, 9:00 AM", R.drawable.beach_cleanup),
+    UpcomingEvent(2, "Emergency Relief", "Disaster Site", "Ongoing", R.drawable.emergency_relief)
 )
 val sampleSuggestedEvents = listOf(
-    SuggestedEvent("Help Kids Read", "Central Library", R.drawable.help_kids_read),
-    SuggestedEvent("Animal Rescue", "Animal Shelter", R.drawable.animal_rescue)
+    SuggestedEvent(3, "Help Kids Read", "Central Library", R.drawable.help_kids_read),
+    SuggestedEvent(4, "Animal Rescue", "City Animal Shelter", R.drawable.animal_rescue)
 )
 
-// RENAMED from HomeScreen
 @Composable
-fun HomeScreenContent() {
-    // REMOVED Scaffold wrapper
+fun HomeScreenContent(navController: NavController) {
+    val profileViewModel: ProfileViewModel = viewModel()
+    val profile by profileViewModel.profile.collectAsState()
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp)
     ) {
-        // Welcome Header
         item {
             Spacer(modifier = Modifier.height(16.dp))
-            WelcomeHeader(name = "Krish")
+            WelcomeHeader(name = profile.name)
             Spacer(modifier = Modifier.height(24.dp))
         }
-
-        // Stats Section
         item {
             StatsSection()
             Spacer(modifier = Modifier.height(32.dp))
         }
-
-        // Upcoming Events Section
         item {
             SectionHeader(title = "Your Upcoming Events", onSeeAllClick = {})
             Spacer(modifier = Modifier.height(16.dp))
         }
-        items(sampleUpcomingEvents.size) { index ->
-            UpcomingEventCard(event = sampleUpcomingEvents[index])
+        items(sampleUpcomingEvents) { event ->
+            UpcomingEventCard(
+                event = event,
+                onClick = { navController.navigate(Screen.EventDetails.createRoute(event.id)) }
+            )
             Spacer(modifier = Modifier.height(16.dp))
         }
-
-        // Suggested For You Section
         item {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
@@ -75,14 +81,15 @@ fun HomeScreenContent() {
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
-        items(sampleSuggestedEvents.size) { index ->
-            SuggestedEventCard(event = sampleSuggestedEvents[index])
+        items(sampleSuggestedEvents) { event ->
+            SuggestedEventCard(
+                event = event,
+                onClick = { navController.navigate(Screen.EventDetails.createRoute(event.id)) }
+            )
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
-
-// REMOVED HomeTopAppBar and AppBottomNavigationBar from this file
 
 @Composable
 fun WelcomeHeader(name: String) {
@@ -105,23 +112,22 @@ fun WelcomeHeader(name: String) {
 fun StatsSection() {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        // Use spacedBy for consistent spacing between items
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         StatCard(
-            modifier = Modifier.weight(1f), // This card takes 1/3 of the space
+            modifier = Modifier.weight(1f),
             iconRes = R.drawable.ic_time,
             value = "76",
             label = "Volunteer Hours"
         )
         StatCard(
-            modifier = Modifier.weight(1f), // This card takes 1/3 of the space
+            modifier = Modifier.weight(1f),
             iconRes = R.drawable.ic_calendar,
             value = "12",
             label = "Events Attended"
         )
         StatCard(
-            modifier = Modifier.weight(1f), // This card takes 1/3 of the space
+            modifier = Modifier.weight(1f),
             iconRes = R.drawable.ic_trophy,
             value = "6",
             label = "Badges Earned"
@@ -144,7 +150,8 @@ fun StatCard(
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             Icon(
                 painter = painterResource(id = iconRes),
@@ -174,9 +181,13 @@ fun SectionHeader(title: String, onSeeAllClick: () -> Unit) {
 }
 
 @Composable
-fun UpcomingEventCard(event: UpcomingEvent) {
+fun UpcomingEventCard(event: UpcomingEvent, onClick: () -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().clickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = LocalIndication.current,
+            onClick = onClick
+        ),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -204,9 +215,13 @@ fun UpcomingEventCard(event: UpcomingEvent) {
 }
 
 @Composable
-fun SuggestedEventCard(event: SuggestedEvent) {
+fun SuggestedEventCard(event: SuggestedEvent, onClick: () -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().clickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = LocalIndication.current,
+            onClick = onClick
+        ),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -215,9 +230,7 @@ fun SuggestedEventCard(event: SuggestedEvent) {
             Image(
                 painter = painterResource(id = event.imageRes),
                 contentDescription = event.title,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(150.dp),
+                modifier = Modifier.fillMaxWidth().height(150.dp),
                 contentScale = ContentScale.Crop
             )
             Row(
@@ -231,7 +244,10 @@ fun SuggestedEventCard(event: SuggestedEvent) {
                     Text(text = event.title, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = PrimaryBlueText)
                     Text(text = event.location, fontSize = 14.sp, color = Color.DarkGray)
                 }
-                Button(onClick = { /*TODO*/ }, colors = ButtonDefaults.buttonColors(containerColor = BlueButtonColor)) {
+                Button(
+                    onClick = onClick,
+                    colors = ButtonDefaults.buttonColors(containerColor = BlueButtonColor)
+                ) {
                     Text("Details")
                 }
             }
@@ -239,11 +255,10 @@ fun SuggestedEventCard(event: SuggestedEvent) {
     }
 }
 
-
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
     GoodDeedProjectTheme {
-        HomeScreenContent()
+        HomeScreenContent(navController = rememberNavController())
     }
 }

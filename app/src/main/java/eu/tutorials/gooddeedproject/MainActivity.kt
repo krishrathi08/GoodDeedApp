@@ -3,16 +3,14 @@ package eu.tutorials.gooddeedproject
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.yourpackage.home.MainScreen
 import com.yourpackage.signup.SignUpScreen
 import eu.tutorials.gooddeedproject.auth.AuthViewModel
+import eu.tutorials.gooddeedproject.home.MainScreen
 import eu.tutorials.gooddeedproject.signin.OrganizerSignInScreen
 import eu.tutorials.gooddeedproject.signin.UserSignInScreen
 import eu.tutorials.gooddeedproject.signup.OrganizerSignUpScreen
@@ -29,8 +27,10 @@ class MainActivity : ComponentActivity() {
                 val currentUser by authViewModel.currentUser.collectAsState()
 
                 if (currentUser != null) {
+                    // If user is logged in, show the main app with home, explore, etc.
                     MainScreen(authViewModel = authViewModel)
                 } else {
+                    // If user is not logged in, show the authentication flow
                     AuthNavigation(authViewModel)
                 }
             }
@@ -45,7 +45,7 @@ fun AuthNavigation(authViewModel: AuthViewModel) {
     NavHost(navController = navController, startDestination = "selection") {
         composable("selection") {
             SignUpScreen(
-                onUserSignUpClick = { navController.navigate("user_signup_step1") }, // Go to step 1
+                onUserSignUpClick = { navController.navigate("user_signup_step1") },
                 onOrganizerSignUpClick = { navController.navigate("organizer_signup") }
             )
         }
@@ -58,7 +58,7 @@ fun AuthNavigation(authViewModel: AuthViewModel) {
         composable("user_signup_step2") {
             UserSignUpScreenStep2(
                 authViewModel = authViewModel,
-                onSignUpClick = {}, // Success is handled automatically by the MainActivity state
+                onSignUpClick = {}, // Success is handled by the MainActivity state change
                 onSignInClick = { navController.navigate("user_signin") }
             )
         }
@@ -71,7 +71,7 @@ fun AuthNavigation(authViewModel: AuthViewModel) {
         composable("user_signin") {
             UserSignInScreen(
                 authViewModel = authViewModel,
-                onSignUpClick = { navController.navigate("user_signup") }
+                onSignUpClick = { navController.navigate("user_signup_step1") }
             )
         }
         composable("organizer_signin") {

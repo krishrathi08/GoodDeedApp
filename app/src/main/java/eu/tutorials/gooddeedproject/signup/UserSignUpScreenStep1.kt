@@ -114,16 +114,6 @@ fun UserSignUpScreenStep1(
                 label = "Email",
                 keyboardType = KeyboardType.Email
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            AuthTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = "Password",
-                keyboardType = KeyboardType.Password,
-                isPassword = true,
-                passwordVisible = passwordVisible,
-                onPasswordVisibilityChange = { passwordVisible = !passwordVisible }
-            )
             Spacer(modifier = Modifier.height(32.dp))
             Button(
                 onClick = onNextClick,

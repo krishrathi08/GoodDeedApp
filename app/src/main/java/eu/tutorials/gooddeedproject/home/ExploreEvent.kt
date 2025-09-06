@@ -3,6 +3,7 @@ package eu.tutorials.gooddeedproject.home
 import androidx.annotation.DrawableRes
 
 data class ExploreEvent(
+    val id: Int,
     val category: String,
     val title: String,
     val location: String,
