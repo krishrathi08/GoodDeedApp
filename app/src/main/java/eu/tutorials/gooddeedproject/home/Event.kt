@@ -1,18 +1,24 @@
 package eu.tutorials.gooddeedproject.home
 
 import androidx.annotation.DrawableRes
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
-data class UpcomingEvent(
-    val id: Int,
-    val title: String,
-    val location: String,
-    val dateTime: String,
-    @DrawableRes val imageRes: Int
-)
+@Parcelize
+data class Event(
+    val id: String = "",
+    val organizerId: String = "",
+    val organizerName: String = "",
+    val organizerLogoUrl: String = "",
+    val title: String = "",
+    val description: String = "",
+    val category: String = "",
+    val location: String = "",
+    val date: Long = 0L,
+    val time: String = "",
+    val imageUrl: String = "",
+    val durationInHours: Int = 0,
+    val registeredUserIds: List<String> = emptyList()
+) : Parcelable
 
-data class SuggestedEvent(
-    val id: Int,
-    val title: String,
-    val location: String,
-    @DrawableRes val imageRes: Int
-)
+

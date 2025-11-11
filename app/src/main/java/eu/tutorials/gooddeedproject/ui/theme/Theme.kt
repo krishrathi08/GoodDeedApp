@@ -12,44 +12,36 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-// Define our custom Dark Color Scheme using colors from Color.kt
-private val CustomDarkColorScheme = darkColorScheme(
-    primary = BlueButtonColor,
-    secondary = OrangeButtonColor,
-    background = AppBackgroundColor,
-    surface = AppBackgroundColor, // Important for Surfaces, Cards, etc.
+private val LightColorScheme = lightColorScheme(
+    primary = OrangeButtonColor,
     onPrimary = Color.White,
-    onSecondary = Color.White,
-    onBackground = TextColor,
-    onSurface = TextColor,
+    background = LightGrayBackground,
+    surface = Color.White,
+    onBackground = Color.Black,
+    onSurface = Color.DarkGray
 )
 
-// Define our custom Light Color Scheme using colors from Color.kt
-private val CustomLightColorScheme = lightColorScheme(
-    primary = BlueButtonColor,
-    secondary = OrangeButtonColor,
-    background = LightGrayBackground,
-    surface = Color.White, // Cards and Surfaces will be white
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onBackground = LightTextColor,
-    onSurface = LightTextColor,
+// ✅ Dark Color Scheme
+private val DarkColorScheme = darkColorScheme(
+    primary = OrangeButtonColor,
+    onPrimary = OnDarkPrimary,
+    background = DarkBackground,
+    surface = DarkSurface,
+    onBackground = OnDarkText,
+    onSurface = OnDarkText
 )
 
 @Composable
 fun GoodDeedProjectTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is disabled to enforce our custom brand colors.
-    dynamicColor: Boolean = false,
+    darkTheme: Boolean = isSystemInDarkTheme(), // Automatically detect system theme
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) {
-        CustomDarkColorScheme
-    } else {
-        CustomLightColorScheme
+    val colorScheme = when {
+        darkTheme -> DarkColorScheme
+        else -> LightColorScheme
     }
 
-    // This block changes the system's status bar color to match our app's background
+    // This code handles the status bar color
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
@@ -61,7 +53,7 @@ fun GoodDeedProjectTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography, // Added typography to apply your Poppins/Inter fonts
+        typography = Typography,
         content = content
     )
 }

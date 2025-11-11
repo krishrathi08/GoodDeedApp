@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,7 +42,8 @@ fun SignUpScreen(
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "App Logo",
-                modifier = Modifier.width(220.dp) // Adjust width as needed
+                modifier = Modifier.size(220.dp),
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
             )
 
             Spacer(modifier = Modifier.height(80.dp))

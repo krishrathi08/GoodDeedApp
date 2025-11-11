@@ -13,16 +13,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import eu.tutorials.gooddeedproject.R
 import eu.tutorials.gooddeedproject.auth.AuthViewModel
 import eu.tutorials.gooddeedproject.signup.AuthTextField
-import eu.tutorials.gooddeedproject.signup.SignInPrompt
 import eu.tutorials.gooddeedproject.ui.theme.*
 
 @Composable
@@ -33,6 +34,8 @@ fun OrganizerSignInScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var rememberMe by remember { mutableStateOf(false) }
+
+    var passwordVisible by remember { mutableStateOf(false) }
 
     val savedEmail by authViewModel.savedEmail.collectAsState(initial = "")
 
@@ -46,7 +49,8 @@ fun OrganizerSignInScreen(
     val authState by authViewModel.authState.collectAsState()
     val context = LocalContext.current
 
-    LaunchedEffect(authState) {
+    // ✅ Handle errors
+    LaunchedEffect(authState.error) {
         authState.error?.let {
             Toast.makeText(context, "Error: $it", Toast.LENGTH_LONG).show()
             authViewModel.resetAuthState()
@@ -68,7 +72,8 @@ fun OrganizerSignInScreen(
                 Image(
                     painter = painterResource(id = R.drawable.logo),
                     contentDescription = "App Logo",
-                    modifier = Modifier.width(180.dp)
+                    modifier = Modifier.size(180.dp),
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 Text(
@@ -92,7 +97,9 @@ fun OrganizerSignInScreen(
                     onValueChange = { password = it },
                     label = "Password",
                     leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password Icon") },
-                    isPassword = true
+                    isPassword = true,
+                    passwordVisible = passwordVisible,
+                    onPasswordVisibilityChange = { passwordVisible = !passwordVisible }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(
@@ -104,7 +111,7 @@ fun OrganizerSignInScreen(
                         onCheckedChange = { rememberMe = it },
                         colors = CheckboxDefaults.colors(
                             checkedColor = OrangeButtonColor,
-                            uncheckedColor = Color.Gray
+                            uncheckedColor = MaterialTheme.colorScheme.onSurface
                         )
                     )
                     Text("Remember Me", color = MaterialTheme.colorScheme.onBackground)
@@ -128,8 +135,6 @@ fun OrganizerSignInScreen(
                     onAppleClick = { /* TODO */ },
                     onGitHubClick = { /* TODO */ }
                 )
-                Spacer(modifier = Modifier.height(24.dp))
-                SignInPrompt(onSignInClick = onSignUpClick, linkColor = OrangeButtonColor)
             }
         }
 
@@ -137,7 +142,7 @@ fun OrganizerSignInScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.5f)),
+                    .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator()

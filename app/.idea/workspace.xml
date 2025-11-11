@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="edcc72cc-b716-4f58-95af-ad68c8aa4d82" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../.idea/studiobot.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/models/User.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/organizer/MainOrganizerScreen.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/organizer/OrganizerDashboardScreen.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/organizer/OrganizerViewModel.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/signup/OrganizerSignUpScreenStep1.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/signup/OrganizerSignUpScreenStep2.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/utils/ImageUtils.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/res/drawable/ic_dashboard.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/res/drawable/ic_events.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/deploymentTargetSelector.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/deploymentTargetSelector.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/google-services.json" beforeDir="false" afterPath="$PROJECT_DIR$/google-services.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/Auth/AuthViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/Auth/AuthViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/MainActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/SignIn/OrganizerSignInScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/SignIn/OrganizerSignInScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/SignIn/UserSignInScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/SignIn/UserSignInScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/home/AccountDetailsScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/home/AccountDetailsScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/home/CommunityData.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/home/CommunityData.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/home/CommunityScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/home/CommunityScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/home/CommunityViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/home/CommunityViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/home/HomeScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/home/HomeScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/home/MainScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/home/MainScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/home/ProfileScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/home/ProfileScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/home/ProfileViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/home/ProfileViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/signup/OrganizerSignUpScreen.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/signup/UserSignUpScreenStep1.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/signup/UserSignUpScreenStep1.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/signup/UserSignUpScreenStep2.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/eu/tutorials/gooddeedproject/signup/UserSignUpScreenStep2.kt" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "krishrathi08"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/krishrathi08/GoodDeedApp.git",
+    "accountId": "7f2efdb0-1610-46ae-9d6a-bde34cb35353"
+  }
+}]]></component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 3
+}]]></component>
+  <component name="ProjectId" id="33XeYJ8pE7CC7vrH5r570BPUmR3" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "android.gradle.sync.needed": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "C:/Users/Hp/AndroidStudioProjects/GoodDeedApp/app"
+  }
+}]]></component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="edcc72cc-b716-4f58-95af-ad68c8aa4d82" name="Changes" comment="" />
+      <created>1759467890021</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1759467890021</updated>
+    </task>
+    <servers />
+  </component>
+</project>

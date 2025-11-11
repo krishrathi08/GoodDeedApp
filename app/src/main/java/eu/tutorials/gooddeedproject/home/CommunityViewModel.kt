@@ -1,130 +1,228 @@
 package eu.tutorials.gooddeedproject.home
 
-import android.app.Application
 import android.net.Uri
-import androidx.lifecycle.AndroidViewModel
+import android.util.Log
+import androidx.compose.ui.input.key.Key.Companion.Notification
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.toObject
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import eu.tutorials.gooddeedproject.R
+import eu.tutorials.gooddeedproject.organizer.OrganizerViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import java.util.UUID
 
-val CURRENT_USER = Story(userId = "user_krish", userName = "Krish Rathi", profilePicRes = R.drawable.profile_krish)
+class CommunityViewModel() : ViewModel() {
 
+    private val db = Firebase.firestore
+    private val auth = Firebase.auth
+    private val storage = Firebase.storage
 
-val sampleStories = listOf(
-    // We will programmatically add the current user's story first.
-    Story("user_akshat", "Akshat", R.drawable.profile_akshat),
-    Story("user_prakhar", "Prakhar", R.drawable.profile_prakhar),
-    Story("user_kartik", "Kartik", R.drawable.profile_kartik),
-    Story("user_vansh", "Vansh", R.drawable.profile_vansh),
-    Story("ngo_clean_beach", "Project Clean Beach", R.drawable.beach_cleanup_post)
-)
+    private val _posts = MutableStateFlow<List<PostWithComments>>(emptyList())
+    val posts: StateFlow<List<PostWithComments>> = _posts.asStateFlow()
 
-val samplePosts = listOf(
-    Post(
-        id = 2,
-        user = sampleStories[4],
-        postedFrom = "",
-        caption = "Waves of change start with a single action! A massive thank you to every volunteer who joined us today. Together, we removed hundreds of kilos of trash from Dumas Beach, leaving nothing but our footprints. Our coast is breathing a little easier because of you!",
-        initialLikes = 25,
-        type = PostType.NGO,
-        postImageRes = R.drawable.beach_cleanup_post,
-        comments = listOf(
-            Comment(sampleStories[3], "Amazing work by the team!"),
-            Comment(sampleStories[2], "So inspiring to see this.")
-        )
-    ),
-    Post(
-        id = 3,
-        user = sampleStories[3],
-        postedFrom = "Community Kitchen Help",
-        caption = "Making a difference, one plate at a time! Had a truly rewarding day at the community kitchen, connecting with people and ensuring warm meals reach those who need them most. The smiles make all the effort worthwhile.",
-        initialLikes = 34,
-        type = PostType.USER,
-        postImageRes = R.drawable.community_kitchen_post,
-        comments = listOf(
-            Comment(sampleStories[1], "Great initiative, Vansh!")
-        )
-    ),
-    Post(
-        id = 1,
-        user = sampleStories[0],
-        postedFrom = "Animal Rescue",
-        postImageRes = R.drawable.post_image_dog_rescue,
-        caption = "Every rescue is a journey of trust. Today, we helped a scared little dog find its way to safety. It's moments like these that fuel my passion for animal welfare. So grateful to be part of its second chance.",
-        initialLikes = 48,
-        type = PostType.USER,
-        comments = listOf(
-            Comment(sampleStories[0], "So heartwarming!"),
-            Comment(sampleStories[4], "You're a hero, Akshat!")
-        )
-    )
-)
+    private val _areCommentsLoading = MutableStateFlow(false)
+    val areCommentsLoading: StateFlow<Boolean> = _areCommentsLoading.asStateFlow()
 
+    private var currentUserProfile: Story? = null
 
-class CommunityViewModel(application: Application) : AndroidViewModel(application) {
+    init {
+        viewModelScope.launch {
+            fetchCurrentUserProfile()
+            listenForPosts()
+        }
+    }
 
-    private val _posts = MutableStateFlow(samplePosts)
-    val posts: StateFlow<List<Post>> = _posts.asStateFlow()
+    private suspend fun fetchCurrentUserProfile() {
+        val user = auth.currentUser ?: return
+        try {
+            val userDoc = db.collection("users").document(user.uid).get().await()
+            if (userDoc.exists()) {
+                // ✅ THE FIX: Fetch 'profilePicUrl' (String) from the user document
+                currentUserProfile = Story(
+                    userId = user.uid,
+                    userName = userDoc.getString("name") ?: "You",
+                    profilePicUrl = userDoc.getString("profilePicUrl") ?: ""
+                )
+            }
+        } catch (e: Exception) {
+            Log.e("AuthViewModel", "Error fetching current user profile", e)
+        }
+    }
 
-    private val _stories = MutableStateFlow(listOf(CURRENT_USER.copy(userName = "Your Story")) + sampleStories)
-    val stories: StateFlow<List<Story>> = _stories.asStateFlow()
+    private fun listenForPosts() {
+        db.collection("posts")
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) { return@addSnapshotListener }
+                if (snapshot != null) {
+                    val firestorePosts = snapshot.documents.mapNotNull { it.toObject<Post>() }
+                    _posts.update {
+                        firestorePosts.map { post ->
+                            // Keep existing comments and like state if already present
+                            val existing = it.find { p -> p.post.id == post.id }
+                            PostWithComments(
+                                post = post,
+                                comments = existing?.comments ?: emptyList(),
+                                isLiked = existing?.isLiked ?: false
+                            )
+                        }
+                    }
+                }
+            }
+    }
 
-    fun deletePost(postId: Int) {
-        _posts.update { currentPosts ->
-            currentPosts.filterNot { it.id == postId }
+    fun deletePost(post: Post) {
+        viewModelScope.launch {
+            try {
+                // Step A: Firestore se post document ko delete karo
+                db.collection("posts").document(post.id).delete().await()
+
+                // Step B: Agar post mein image hai, toh use Storage se delete karo
+                if (post.postImageUrl.isNotBlank()) {
+                    Firebase.storage.getReferenceFromUrl(post.postImageUrl).delete().await()
+                }
+            } catch (e: Exception) {
+                Log.e("CommunityViewModel", "Error deleting post", e)
+                // Yahan aap user ko error dikha sakte ho agar zaroori ho
+            }
         }
     }
 
     fun onLikeClicked(postToUpdate: Post) {
         _posts.update { currentPosts ->
-            currentPosts.map { post ->
-                if (post.id == postToUpdate.id) {
-                    post.copy(
-                        isLiked = !post.isLiked,
-                        likes = if (post.isLiked) post.likes - 1 else post.likes + 1
+            currentPosts.map { postWithComments ->
+                if (postWithComments.post.id == postToUpdate.id) {
+                    // Determine the new like state and count
+                    val newIsLiked = !postWithComments.isLiked
+                    val newLikeCount = if (newIsLiked) {
+                        postWithComments.post.likes + 1
+                    } else {
+                        postWithComments.post.likes - 1
+                    }
+
+                    // Update the post in Firestore (so the like is permanent)
+                    val postRef = db.collection("posts").document(postToUpdate.id)
+                    db.runBatch { batch ->
+                        // Use FieldValue.increment to safely handle multiple likes at once
+                        batch.update(postRef, "likes", newLikeCount)
+                        // TODO: You would also save which users liked which post here
+                    }
+
+                    // Return the updated state for the UI to show immediately
+                    postWithComments.copy(
+                        isLiked = newIsLiked,
+                        post = postWithComments.post.copy(likes = newLikeCount)
                     )
+
                 } else {
-                    post
+                    postWithComments
                 }
             }
         }
     }
 
-    fun addPost(caption: String, imageUri: Uri?) {
-        if (imageUri == null) return
-        val newPost = Post(
-            id = (_posts.value.maxOfOrNull { it.id } ?: 0) + 1,
-            user = CURRENT_USER,
-            postedFrom = "New Post",
-            postImageUri = imageUri,
-            caption = caption,
-            initialLikes = 0,
-            comments = emptyList(),
-            type = PostType.USER
-        )
-        _posts.update { currentPosts -> listOf(newPost) + currentPosts }
-    }
-
-    // ADD THIS NEW FUNCTION
-    fun addComment(postId: Int, commentText: String) {
+    fun addComment(postId: String, commentText: String) {
+        val user = currentUserProfile ?: return
         if (commentText.isBlank()) return
 
-        val newComment = Comment(
-            user = CURRENT_USER, // New comments are always from the current user
-            text = commentText
+        val comment = Comment(
+            user = user,
+            text = commentText,
+            timestamp = System.currentTimeMillis()
         )
+        db.collection("posts").document(postId)
+            .collection("comments")
+            .add(comment)
+        // Listener will auto-update UI
+    }
 
-        _posts.update { currentPosts ->
-            currentPosts.map { post ->
-                if (post.id == postId) {
-                    // Adds the new comment to the beginning of the list
-                    post.copy(comments = listOf(newComment) + post.comments)
-                } else {
-                    post
+    fun listenForComments(postId: String) {
+        db.collection("posts").document(postId)
+            .collection("comments")
+            .orderBy("timestamp", Query.Direction.ASCENDING) // Show oldest comments first
+            .addSnapshotListener { snapshot, _ ->
+                if (snapshot != null) {
+                    val comments = snapshot.documents.mapNotNull { doc ->
+                        doc.toObject<Comment>()?.copy(id = doc.id)
+                    }
+                    _posts.update { currentPosts ->
+                        currentPosts.map { postWithComments ->
+                            if (postWithComments.post.id == postId) {
+                                postWithComments.copy(comments = comments)
+                            } else {
+                                postWithComments
+                            }
+                        }
+                    }
                 }
+                _areCommentsLoading.value = false
+            }
+    }
+
+    fun addPost(caption: String, imageUri: Uri?, taggedEventId: String?) {
+        viewModelScope.launch {
+            val user = currentUserProfile ?: return@launch
+            if (imageUri == null) return@launch
+
+            try {
+                // Step 1: Image upload pehle karo
+                val imageRef = storage.reference.child("post_images/${UUID.randomUUID()}")
+                val downloadUrl = imageRef.putFile(imageUri).await()
+                    .storage.downloadUrl.await().toString()
+
+                // Step 2: Post aur Notification objects taiyaar karo
+                val postId = db.collection("posts").document().id
+                val newPost = Post(
+                    id = postId,
+                    user = user,
+                    caption = caption,
+                    postImageUrl = downloadUrl,
+                    timestamp = System.currentTimeMillis(),
+                    taggedEventId = taggedEventId
+                )
+
+                // Step 3: Batch write shuru karo
+                val batch = db.batch()
+
+                // Post ko batch mein add karo
+                val postRef = db.collection("posts").document(postId)
+                batch.set(postRef, newPost)
+
+                // Agar event tagged hai, toh notification ko bhi batch mein add karo
+                if (taggedEventId != null) {
+                    val eventDoc = db.collection("events").document(taggedEventId).get().await()
+                    val organizerId = eventDoc.getString("organizerId")
+                    if (organizerId != null) {
+                        val notificationMessage = "${user.userName} tagged your event in a post."
+                        val notificationId = db.collection("notifications").document().id
+                        val notification = OrganizerViewModel.Notification( // ✅ Typo fixed
+                            id = notificationId,
+                            organizerId = organizerId,
+                            message = notificationMessage,
+                            type = "POST_TAG",
+                            timestamp = System.currentTimeMillis()
+                        )
+                        val notificationRef = db.collection("notifications").document(notificationId)
+                        batch.set(notificationRef, notification)
+                    }
+                }
+
+                // Step 4: Batch ko commit karo (dono cheezein ek saath save hongi)
+                batch.commit().await()
+
+            } catch (e: Exception) {
+                Log.e("CommunityViewModel", "Error adding post", e)
             }
         }
     }

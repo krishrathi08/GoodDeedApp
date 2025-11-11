@@ -22,7 +22,7 @@ import eu.tutorials.gooddeedproject.ui.theme.BlueButtonColor
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountDetailsScreen(navController: NavController, authViewModel: AuthViewModel) {
-    val signUpState by authViewModel.signUpState.collectAsState()
+    val signUpState by authViewModel.userSignUpState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -35,9 +35,9 @@ fun AccountDetailsScreen(navController: NavController, authViewModel: AuthViewMo
                 },
                 actions = {
                     TextButton(onClick = {
-                        // In a real app, you would save these details to Firestore here.
-                        // For now, it just goes back.
                         navController.popBackStack()
+
+
                     }) {
                         Text("Save", color = BlueButtonColor, fontWeight = FontWeight.Bold)
                     }
@@ -53,38 +53,35 @@ fun AccountDetailsScreen(navController: NavController, authViewModel: AuthViewMo
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Each field is now an OutlinedTextField, allowing the user to edit the value.
-            // The value is read from the AuthViewModel and updated using onSignUpInfoChanged.
-
             AuthTextField(
                 value = signUpState.name,
-                onValueChange = { authViewModel.onSignUpInfoChanged(name = it) },
+                onValueChange = { authViewModel.onUserSignUpInfoChanged(name = it) },
                 label = "Name"
             )
 
             AuthTextField(
                 value = signUpState.email,
-                onValueChange = { authViewModel.onSignUpInfoChanged(email = it) },
+                onValueChange = { authViewModel.onUserSignUpInfoChanged(email = it) },
                 label = "Email",
                 keyboardType = KeyboardType.Email
             )
 
             AuthTextField(
                 value = signUpState.phone,
-                onValueChange = { authViewModel.onSignUpInfoChanged(phone = it) },
+                onValueChange = { authViewModel.onUserSignUpInfoChanged(phone = it) },
                 label = "Phone Number",
                 keyboardType = KeyboardType.Phone
             )
 
             AuthTextField(
                 value = signUpState.city,
-                onValueChange = { authViewModel.onSignUpInfoChanged(city = it) },
+                onValueChange = { authViewModel.onUserSignUpInfoChanged(city = it) },
                 label = "City"
             )
 
             AuthTextField(
                 value = signUpState.dob,
-                onValueChange = { authViewModel.onSignUpInfoChanged(dob = it) },
+                onValueChange = { authViewModel.onUserSignUpInfoChanged(dob = it) },
                 label = "Date of Birth (DD/MM/YYYY)"
             )
 
@@ -92,14 +89,14 @@ fun AccountDetailsScreen(navController: NavController, authViewModel: AuthViewMo
             MultiSelectChipGroup(
                 options = listOf("Weekdays", "Weekends", "Evenings"),
                 selectedOptions = signUpState.availability,
-                onSelectionChanged = { authViewModel.onSignUpInfoChanged(availability = it) }
+                onSelectionChanged = { authViewModel.onUserSignUpInfoChanged(availability = it) }
             )
 
             Text("Your Skills", color = MaterialTheme.colorScheme.onBackground)
             MultiSelectChipGroup(
                 options = listOf("Teaching", "Medical", "Driving", "Management"),
                 selectedOptions = signUpState.skills,
-                onSelectionChanged = { authViewModel.onSignUpInfoChanged(skills = it) }
+                onSelectionChanged = { authViewModel.onUserSignUpInfoChanged(skills = it) }
             )
         }
     }

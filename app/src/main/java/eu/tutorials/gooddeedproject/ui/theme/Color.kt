@@ -1,5 +1,8 @@
 package eu.tutorials.gooddeedproject.ui.theme
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
 val Purple80 = Color(0xFFD0BCFF)
@@ -22,12 +25,13 @@ val PrimaryBlueText = Color(0xFF4A8FF7)
 
 // ... other colors
 val LightGrayBackground = Color(0xFFF7F7F7)
-
-
-val TextColor = Color.White
-val CardColor = Color(0xFF2A2A2A) // A slightly lighter gray for cards
-
-// Light Theme Colors
-val LightTextColor = Color.Black
+val LightGraySurface = Color(0xFFF1F1F1)
+val LightGrayText = Color(0xFF999999)
+val LightGrayBorder = Color(0xFFE0E0E0)
 
 val StoryBorderColor = Color.Red
+
+val DarkBackground = Color(0xFF121212)
+val DarkSurface = Color(0xFF1E1E1E) // For Cards
+val OnDarkText = Color(0xFFE0E0E0)
+val OnDarkPrimary = Color(0xFFFFFFFF)

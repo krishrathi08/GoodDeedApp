@@ -11,12 +11,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -28,6 +30,7 @@ import eu.tutorials.gooddeedproject.ui.theme.LightGrayBackground
 import eu.tutorials.gooddeedproject.ui.theme.PrimaryBlueText
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import kotlinx.coroutines.delay
 
 // Defines all the possible screens in our main app navigation
 sealed class Screen(val route: String) {
@@ -38,10 +41,6 @@ sealed class Screen(val route: String) {
     object CreatePost : Screen("create_post")
     object AccountDetails : Screen("account_details")
     object AllBadges : Screen("all_badges")
-
-    object EventDetails : Screen("event_details/{eventId}") {
-        fun createRoute(eventId: Int) = "event_details/$eventId"
-    }
 }
 
 data class BottomBarItem(val screen: Screen, val title: String, @DrawableRes val iconRes: Int)
@@ -82,7 +81,9 @@ fun MainScreen(authViewModel: AuthViewModel) {
 }
 
 @Composable
-fun AppTopAppBar(title: String, navController: NavController, authViewModel: AuthViewModel) {
+fun AppTopAppBar(title: String,
+                 navController: NavController,
+                 authViewModel: AuthViewModel) {
     var showMenu by remember { mutableStateOf(false) }
 
     Row(
@@ -97,18 +98,19 @@ fun AppTopAppBar(title: String, navController: NavController, authViewModel: Aut
             Image(
                 painter = painterResource(id = R.drawable.logo_withouttext),
                 contentDescription = "App Logo",
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(36.dp),
+                // ✅ Add this line
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = title, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+            Text(text = title, fontSize = 22.sp, fontWeight = FontWeight.Bold)
         }
         Box {
             IconButton(onClick = { showMenu = true }) {
-                Icon(
+                Image(
                     painter = painterResource(id = R.drawable.ic_settings),
                     contentDescription = "Settings",
-                    modifier = Modifier.size(28.dp),
-                    tint = Color.Gray
+                    modifier = Modifier.size(28.dp)
                 )
             }
             DropdownMenu(
@@ -145,7 +147,7 @@ fun AppBottomNavigationBar(navController: NavController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    NavigationBar(containerColor = Color.White) {
+    NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
         items.forEach { item ->
             NavigationBarItem(
                 label = { Text(text = item.title) },
@@ -159,8 +161,8 @@ fun AppBottomNavigationBar(navController: NavController) {
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    unselectedIconColor = Color.Gray,
-                    unselectedTextColor = Color.Gray,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurface,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurface,
                     selectedIconColor = PrimaryBlueText,
                     selectedTextColor = PrimaryBlueText,
                     indicatorColor = LightGrayBackground
@@ -175,7 +177,7 @@ fun CommunityFAB(onClick: () -> Unit) {
     var isExpanded by remember { mutableStateOf(false) }
     LaunchedEffect(isExpanded) {
         if (isExpanded) {
-            kotlinx.coroutines.delay(3000)
+            delay(3000)
             isExpanded = false
         }
     }
@@ -191,34 +193,58 @@ fun CommunityFAB(onClick: () -> Unit) {
         text = { AnimatedVisibility(visible = isExpanded) { Text("New Post") } },
         icon = { Icon(Icons.Default.Add, contentDescription = "New Post") },
         containerColor = BlueButtonColor,
-        contentColor = Color.White,
+        contentColor = MaterialTheme.colorScheme.surface,
         expanded = isExpanded,
     )
 }
 
 @Composable
-fun BottomNavGraph(navController: androidx.navigation.NavHostController, authViewModel: AuthViewModel) {
+fun BottomNavGraph(navController: NavHostController, authViewModel: AuthViewModel) {
     val communityViewModel: CommunityViewModel = viewModel()
+    val eventsViewModel: EventsViewModel = viewModel()
 
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route
     ) {
-        composable(route = Screen.Home.route) { HomeScreenContent(navController) }
+        composable(route = Screen.Home.route) { HomeScreenContent(
+            navController,
+            authViewModel = viewModel()
+        ) }
         composable(route = Screen.Explore.route) { ExploreScreen(navController) }
         composable(route = Screen.Community.route) { CommunityScreen(authViewModel = authViewModel, communityViewModel = communityViewModel) }
-        composable(route = Screen.Profile.route) { ProfileScreen(navController = navController, authViewModel = authViewModel) }
-        composable(route = Screen.CreatePost.route) { CreatePostScreen(navController = navController, viewModel = communityViewModel) }
+        composable(route = Screen.Profile.route) { ProfileScreen(navController = navController) }
+        composable(route = Screen.CreatePost.route) { CreatePostScreen(navController = navController,
+            communityViewModel = communityViewModel,
+            eventsViewModel = eventsViewModel ) }
         composable(route = Screen.AccountDetails.route) { AccountDetailsScreen(navController = navController, authViewModel = authViewModel) }
         composable(route = Screen.AllBadges.route) { AllBadgesScreen(navController = navController) }
         composable(
-            route = Screen.EventDetails.route,
-            arguments = listOf(navArgument("eventId") { type = NavType.IntType })
+            route = "event_details/{eventId}",
+            arguments = listOf(navArgument("eventId") { type = NavType.StringType })
         ) { backStackEntry ->
-            val eventId = backStackEntry.arguments?.getInt("eventId")
+            val eventId = backStackEntry.arguments?.getString("eventId") // <-- FIX 2
             if (eventId != null) {
                 EventDetailsScreen(eventId = eventId, navController = navController)
             }
+        }
+        composable(
+            route = "create_post?eventId={eventId}",
+            arguments = listOf(
+                navArgument("eventId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStackEntry ->
+            CreatePostScreen(
+                navController = navController,
+                communityViewModel = communityViewModel,
+                eventsViewModel = eventsViewModel,
+                // ✅ Pass the eventId to the screen
+                taggedEventId = backStackEntry.arguments?.getString("eventId")
+            )
         }
     }
 }

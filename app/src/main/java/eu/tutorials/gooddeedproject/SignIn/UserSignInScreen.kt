@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -35,6 +36,8 @@ fun UserSignInScreen(
     var rememberMe by remember { mutableStateOf(false) }
 
     val savedEmail by authViewModel.savedEmail.collectAsState(initial = "")
+
+    var passwordVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(savedEmail) {
         if (savedEmail.isNotEmpty()) {
@@ -68,7 +71,8 @@ fun UserSignInScreen(
                 Image(
                     painter = painterResource(id = R.drawable.logo),
                     contentDescription = "App Logo",
-                    modifier = Modifier.width(180.dp)
+                    modifier = Modifier.size(180.dp),
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 Text(
@@ -92,7 +96,9 @@ fun UserSignInScreen(
                     onValueChange = { password = it },
                     label = "Password",
                     leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password Icon") },
-                    isPassword = true
+                    isPassword = true,
+                    passwordVisible = passwordVisible,
+                    onPasswordVisibilityChange = { passwordVisible = !passwordVisible }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(
@@ -104,7 +110,7 @@ fun UserSignInScreen(
                         onCheckedChange = { rememberMe = it },
                         colors = CheckboxDefaults.colors(
                             checkedColor = PrimaryBlueText,
-                            uncheckedColor = Color.Gray
+                            uncheckedColor = MaterialTheme.colorScheme.onSurface
                         )
                     )
                     Text("Remember Me", color = MaterialTheme.colorScheme.onBackground)
@@ -118,7 +124,12 @@ fun UserSignInScreen(
                         .fillMaxWidth()
                         .height(56.dp)
                 ) {
-                    Text("Sign In", fontSize = 18.sp, fontFamily = poppinsFontFamily, fontWeight = FontWeight.Bold)
+                    Text(
+                        "Sign In",
+                        fontSize = 18.sp,
+                        fontFamily = poppinsFontFamily,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
                 Spacer(modifier = Modifier.height(32.dp))
                 DividerWithText()
@@ -137,7 +148,7 @@ fun UserSignInScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.5f)),
+                    .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator()

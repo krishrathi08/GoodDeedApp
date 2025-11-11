@@ -11,6 +11,8 @@ kotlin-compose = "1.5.10" # This is the Compose Compiler version
 lifecycle-runtime-ktx = "2.8.0"
 activity-ktx = "1.10.1"
 animation-core-lint = "1.9.0"
+ui-graphics = "1.9.2"
+room-ktx = "2.8.3"
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
@@ -31,6 +33,8 @@ androidx-compose-animation = { group = "androidx.compose.animation", name = "ani
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activity-ktx" }
 androidx-animation-core-lint = { group = "androidx.compose.animation", name = "animation-core-lint", version.ref = "animation-core-lint" }
+ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", version.ref = "ui-graphics" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room-ktx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

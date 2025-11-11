@@ -52,7 +52,7 @@ fun ProfileImagePicker(imageUri: Uri?, onClick: () -> Unit) {
             modifier = Modifier
                 .size(100.dp)
                 .clip(CircleShape)
-                .border(1.dp, Color.Gray, CircleShape),
+                .border(1.dp, MaterialTheme.colorScheme.onSurface, CircleShape),
             contentAlignment = Alignment.Center
         ) {
             if (imageUri != null) {
@@ -66,7 +66,7 @@ fun ProfileImagePicker(imageUri: Uri?, onClick: () -> Unit) {
                 Icon(
                     imageVector = Icons.Default.Image,
                     contentDescription = "Profile Image Placeholder",
-                    tint = Color.Gray,
+                    tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(40.dp)
                 )
             }
@@ -74,7 +74,7 @@ fun ProfileImagePicker(imageUri: Uri?, onClick: () -> Unit) {
         Icon(
             imageVector = Icons.Default.Add,
             contentDescription = "Add Profile Image",
-            tint = Color.White,
+            tint = MaterialTheme.colorScheme.surface,
             modifier = Modifier
                 .size(30.dp)
                 .background(PrimaryBlueText, CircleShape)
@@ -99,18 +99,18 @@ fun AuthTextField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(label, color = Color.Gray) },
+        label = { Text(label, color = MaterialTheme.colorScheme.onSurface) },
         leadingIcon = leadingIcon,
         modifier = Modifier.fillMaxWidth(),
         singleLine = (minLines == 1),
         minLines = minLines,
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = PrimaryBlueText,
-            unfocusedBorderColor = Color.Gray,
+            unfocusedBorderColor = MaterialTheme.colorScheme.onSurface,
             cursorColor = PrimaryBlueText,
             // REMOVED the lines that forced text color to white
             focusedLeadingIconColor = PrimaryBlueText,
-            unfocusedLeadingIconColor = Color.Gray
+            unfocusedLeadingIconColor = MaterialTheme.colorScheme.onSurface
         ),
         shape = RoundedCornerShape(12.dp),
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
@@ -121,7 +121,7 @@ fun AuthTextField(
                     Icon(
                         imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
                         contentDescription = if (passwordVisible) "Hide password" else "Show password",
-                        tint = Color.Gray
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -132,7 +132,7 @@ fun AuthTextField(
 @Composable
 fun SignInPrompt(onSignInClick: () -> Unit, linkColor: Color) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Text("Already have an account? ", color = Color.Gray, fontSize = 16.sp)
+        Text("Already have an account? ", color = MaterialTheme.colorScheme.onSurface, fontSize = 16.sp)
         ClickableText(
             text = AnnotatedString("Sign In"),
             onClick = { onSignInClick() },

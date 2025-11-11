@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,13 +22,13 @@ fun DividerWithText() {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        Divider(modifier = Modifier.weight(1f), color = Color.Gray)
+        Divider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurface)
         Text(
             text = " or continue with ",
-            color = Color.Gray,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(horizontal = 8.dp)
         )
-        Divider(modifier = Modifier.weight(1f), color = Color.Gray)
+        Divider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurface)
     }
 }
 
@@ -47,7 +48,7 @@ fun SocialLoginButtons(
             modifier = Modifier.size(60.dp),
             contentPadding = PaddingValues(0.dp)
         ) {
-            Icon(painterResource(id = R.drawable.ic_google), contentDescription = "Google Sign In", modifier = Modifier.size(30.dp), tint = Color.Black)
+            Icon(painterResource(id = R.drawable.ic_google), contentDescription = "Google Sign In", modifier = Modifier.size(30.dp), tint = MaterialTheme.colorScheme.onBackground)
         }
         OutlinedButton(
             onClick = onAppleClick,
@@ -55,7 +56,7 @@ fun SocialLoginButtons(
             modifier = Modifier.size(60.dp),
             contentPadding = PaddingValues(0.dp)
         ) {
-            Icon(painterResource(id = R.drawable.ic_apple), contentDescription = "Apple Sign In", modifier = Modifier.size(30.dp), tint = Color.Black)
+            Icon(painterResource(id = R.drawable.ic_apple), contentDescription = "Apple Sign In", modifier = Modifier.size(30.dp), tint = MaterialTheme.colorScheme.onBackground)
         }
         OutlinedButton(
             onClick = onGitHubClick,
@@ -63,7 +64,7 @@ fun SocialLoginButtons(
             modifier = Modifier.size(60.dp),
             contentPadding = PaddingValues(0.dp)
         ) {
-            Icon(painterResource(id = R.drawable.ic_github), contentDescription = "GitHub Sign In", modifier = Modifier.size(30.dp), tint = Color.Black)
+            Icon(painterResource(id = R.drawable.ic_github), contentDescription = "GitHub Sign In", modifier = Modifier.size(30.dp), tint = MaterialTheme.colorScheme.onBackground)
         }
     }
 }
